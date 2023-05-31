@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -15,9 +16,12 @@ import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
+import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -34,26 +38,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.smogunov.steamapp.R
 import com.smogunov.steamapp.model.MainModel
 import com.smogunov.steamapp.ui.theme.SteamAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val mainModel: MainModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,9 +72,33 @@ class MainActivity : ComponentActivity() {
                     topBar = {
                         TopAppBar(
                             title = {
-                                Row {
-                                    val nameRoute = currentBackStackEntry?.destination?.route ?: "unknown destination"
-                                    Text(text = nameRoute)    
+                                when (currentBackStackEntry?.destination?.route) {
+                                    SCREEN.APPS.name -> {
+                                        var text by remember {
+                                            mutableStateOf("")
+                                        }
+                                        TextField(
+                                            value = text,
+                                            onValueChange = {
+                                                text = it
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Default.Search, null)
+                                            },
+                                            trailingIcon = {
+                                                Icon(Icons.Default.Clear, null)
+                                            }
+                                        )
+                                    }
+
+                                    else -> {
+                                        Row {
+                                            val nameRoute =
+                                                currentBackStackEntry?.destination?.route
+                                                    ?: "unknown destination"
+                                            Text(text = nameRoute)
+                                        }
+                                    }
                                 }
                             },
                             navigationIcon = {
