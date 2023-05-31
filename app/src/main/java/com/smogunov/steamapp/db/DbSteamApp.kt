@@ -13,6 +13,7 @@ import androidx.room.RoomDatabase
 @Entity("steam_apps")
 data class DbSteamApp(
     @PrimaryKey
+//    val id: Int = 0,
     val appid: Int,
     val name: String
 )

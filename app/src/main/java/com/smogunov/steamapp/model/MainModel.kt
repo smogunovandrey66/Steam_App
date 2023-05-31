@@ -3,9 +3,11 @@ package com.smogunov.steamapp.model
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.smogunov.steamapp.db.DbSteamApp
 import com.smogunov.steamapp.db.SteamAppDatabase
 import com.smogunov.steamapp.service.SteamService
+import com.smogunov.steamapp.utils.log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +21,7 @@ sealed class ResultLoad {
 }
 
 @HiltViewModel
-class MainModel @Inject constructor(val savedStateHandle: SavedStateHandle): ViewModel() {
+class MainModel @Inject constructor(): ViewModel() {
 
     @Inject
     lateinit var steamService: SteamService
@@ -43,15 +45,21 @@ class MainModel @Inject constructor(val savedStateHandle: SavedStateHandle): Vie
     val stateResultNetwork: StateFlow<ResultLoad> = _stateResultNetwork
 
      fun loadFromNet(){
+         log("loadFromNet")
          _stateResultNetwork.value = ResultLoad.Loading
          viewModelScope.launch {
-             dataBase.streamAppDao().clearSteamApps()
-             val netApps = steamService.getSteamApps()
-             val listDb = netApps.applist.apps.map {
-                 DbSteamApp(it.appid, it.name)
+             try {
+                 dataBase.streamAppDao().clearSteamApps()
+                 val netApps = steamService.getSteamApps()
+                 val listDb = netApps.applist.apps.map {
+                     DbSteamApp(it.appid, it.name)
+                 }
+                 log("count loaded items=${listDb.count()}")
+                 dataBase.streamAppDao().insertSteamApps(listDb)
+                 _stateResultNetwork.value = ResultLoad.Success(listDb)
+             } catch (e: Exception){
+                 _stateResultNetwork.value = ResultLoad.Error(e.message ?: "Error load from net")
              }
-             dataBase.streamAppDao().insertSteamApps(listDb)
-             _stateResultNetwork.value = ResultLoad.Success(listDb)
          }
      }
 }

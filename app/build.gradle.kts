@@ -71,6 +71,8 @@ dependencies {
     implementation(libs.androidx.paging)
     implementation(libs.com.google.dagger)
     implementation(libs.androidx.lifecycle)
+    implementation(libs.androidx.lifecyclektx)
+    implementation(libs.material)
 
     implementation(libs.androidx.hilt)
     kapt(libs.hilt.compiler)
