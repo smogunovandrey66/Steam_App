@@ -128,7 +128,7 @@ class MainActivity : ComponentActivity() {
                                     }
 
                                     else -> {
-                                        /*TODO*/
+
                                     }
                                 }
                             }
@@ -208,16 +208,39 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             ) {
+                                currentScreen = SCREEN.APPS
+                                val refreshScope = rememberCoroutineScope()
+                                var refreshing by remember { mutableStateOf(false) }
+
+                                fun refresh() = refreshScope.launch {
+                                    refreshing = true
+                                    delay(2000)
+                                    refreshing = false
+                                }
+                                val state = rememberPullRefreshState(refreshing, ::refresh)
+
                                 currentScreen = SCREEN.NEWS
-                                val appid = currentBackStackEntry?.arguments?.getInt("appid")!!
-                                Button(onClick = {
-                                    navController.navigate("${SCREEN.TEXT.name}/$appid")
-                                }) {
-                                    Text(text = "NEWS for appid=$appid")
-//                                    val dataNews by mainModel.dataBase.streamAppDao().getNewsFlow(appid = appid.toUInt()).collectAsStateWithLifecycle(
-//                                        initialValue = emptyList()
-//                                    )
-//                                    log("count news = ${dataNews.count()}")
+                                val appid = currentBackStackEntry?.arguments?.getInt("appid")
+                                Box(Modifier.fillMaxSize().pullRefresh(state)) {
+                                    Button(onClick = {
+                                        navController.navigate("${SCREEN.TEXT.name}/$appid")
+                                    }) {
+                                        Text(text = "NEWS for appid=$appid")
+                                        appid?.let {
+                                            val dataNews by mainModel.dataBase.streamAppDao()
+                                                .getNewsFlow(appid = appid)
+                                                .collectAsStateWithLifecycle(
+                                                    initialValue = emptyList()
+                                                )
+                                            log("count news = ${dataNews.count()}")
+                                        }
+                                    }
+
+                                    PullRefreshIndicator(
+                                        refreshing,
+                                        state,
+                                        Modifier.align(Alignment.Center)
+                                    )
                                 }
                             }
 

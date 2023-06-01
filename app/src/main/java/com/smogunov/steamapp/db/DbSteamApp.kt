@@ -87,7 +87,7 @@ interface SteamAppDao{
     suspend fun clearSteamApps()
 
     @Query("SELECT * FROM news WHERE appid = :appid")
-    fun getNewsFlow(appid: UInt): Flow<List<DbNew>>
+    fun getNewsFlow(appid: Int): Flow<List<DbNew>>
 }
 
 @Database(entities = [DbSteamApp::class, DbNew::class], version = 1, exportSchema = false)
