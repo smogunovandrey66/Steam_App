@@ -3,7 +3,7 @@ package com.smogunov.steamapp.model
 import java.util.Date
 
 data class NetApp(
-    val appid: Int,
+    val appid: UInt,
     val name: String
 )
 

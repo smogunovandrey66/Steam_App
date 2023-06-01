@@ -77,7 +77,8 @@ dependencies {
     implementation(libs.androidx.hilt)
     kapt(libs.hilt.compiler)
     
-    implementation(libs.androidx.room)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
     kapt(libs.room.compiler)
 
     testImplementation(libs.junit)

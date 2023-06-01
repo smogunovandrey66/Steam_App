@@ -36,10 +36,11 @@ material = { group = "androidx.compose.material", name = "material-android", ver
 com-squareup-retrofit2 = {group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit-version"}
 com-squareup-retrofit2-gson = {group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "converter-gson-version"}
 androidx-paging = {group = "androidx.paging", name = "paging-compose", version.ref = "paging-compose-version"}
+androidx-room-paging = {group = "androidx.room", name = "room-paging", version.ref = "room-version"}
 com-google-dagger = {group = "com.google.dagger", name = "hilt-android", version.ref = "hilt-android"}
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt-android" }
 androidx-hilt = {group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose"}
-androidx-room = {group = "androidx.room", name = "room-ktx", version.ref = "room-version"}
+androidx-room-ktx = {group = "androidx.room", name = "room-ktx", version.ref = "room-version"}
 room-compiler = {module = "androidx.room:room-compiler", version.ref = "room-version"}
 androidx-lifecycle = {group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-ktx"}
 androidx-lifecyclektx = {group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle-ktx"}
