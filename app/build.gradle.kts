@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.lifecyclektx)
     implementation(libs.material)
+    implementation(libs.androidx.navigation)
 
     implementation(libs.androidx.hilt)
     kapt(libs.hilt.compiler)

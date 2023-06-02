@@ -5,7 +5,6 @@ import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
@@ -13,6 +12,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
@@ -45,13 +45,13 @@ data class DbSteamApp(
 //    val id: Int = 0,
     val appid: Int,
     val name: String,
-    val testU: Long
+    var loadedNews: Boolean
 )
 
 @Entity("news")
 data class DbNew(
     @PrimaryKey
-    val id: Int,
+//    val id: Int,
     val gid: Int,
     val appid: Int,
     val title: String,
@@ -64,6 +64,12 @@ data class DbNew(
 
 @Dao
 interface SteamAppDao{
+
+    @Query("SELECT * FROM steam_apps WHERE appid = :appid")
+    suspend fun getSteamApp(appid: Int): DbSteamApp
+
+    @Update
+    suspend fun updateSteamApp(steamApp: DbSteamApp)
 
     @Query("SELECT * FROM steam_apps LIMIT :limit OFFSET :offset")
     suspend fun getSteamApps(limit: Int, offset: Int): List<DbSteamApp>
@@ -88,12 +94,15 @@ interface SteamAppDao{
 
     @Query("SELECT * FROM news WHERE appid = :appid")
     fun getNewsFlow(appid: Int): Flow<List<DbNew>>
+
+    @Query("SELECT * FROM news WHERE appid = :appid")
+    suspend fun getNewsSuspend(appid: Int): List<DbNew>
 }
 
 @Database(entities = [DbSteamApp::class, DbNew::class], version = 1, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class SteamAppDatabase : RoomDatabase(){
-    abstract fun streamAppDao(): SteamAppDao
+    abstract fun steamAppDao(): SteamAppDao
 
     companion object {
         private var INSTANCE: SteamAppDatabase? = null

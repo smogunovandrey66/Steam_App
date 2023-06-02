@@ -5,13 +5,14 @@ import com.smogunov.steamapp.model.NetSteamAppWithNews
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface SteamService {
     @GET("ISteamApps/GetAppList/v2")
     suspend fun getSteamApps(): NetAppList
 
     @GET("ISteamNews/GetNewsForApp/v2")
-    suspend fun getNewsSteamApp(): NetSteamAppWithNews
+    suspend fun getNewsSteamApp(@Query("appid") appid: Int): NetSteamAppWithNews
 }
 
 object RetrofitClient{

@@ -18,6 +18,7 @@ data class NetAppList(
 data class NetSteamNew(
     val gid: Int,
     val title: String,
+    val is_external_url: Boolean,
     val url: String,
     val author: String,
     val content: String,

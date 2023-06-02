@@ -1,5 +1,6 @@
 package com.smogunov.steamapp.model
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -8,12 +9,12 @@ import androidx.paging.cachedIn
 import com.smogunov.steamapp.db.DbSteamApp
 import com.smogunov.steamapp.db.SteamAppDatabase
 import com.smogunov.steamapp.service.SteamService
+import com.smogunov.steamapp.ui.SCREEN
 import com.smogunov.steamapp.utils.log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.util.Date
 import javax.inject.Inject
 
 sealed class ResultLoad {
@@ -23,13 +24,19 @@ sealed class ResultLoad {
 }
 
 @HiltViewModel
-class MainModel @Inject constructor() : ViewModel() {
+class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     @Inject
     lateinit var steamService: SteamService
 
     @Inject
     lateinit var dataBase: SteamAppDatabase
+
+    private val _currentScreen: MutableStateFlow<SCREEN> = MutableStateFlow(SCREEN.APPS)
+    val currentScreen: StateFlow<SCREEN> = _currentScreen
+    fun setCurrentScreen(aNewScreen: SCREEN) {
+        _currentScreen.value = aNewScreen
+    }
 
     private val _filterApps: MutableStateFlow<String> = MutableStateFlow("")
     val filterApps: StateFlow<String> = _filterApps
@@ -39,17 +46,17 @@ class MainModel @Inject constructor() : ViewModel() {
     }
 
     fun allSteamApps(aFilter: String) = Pager(PagingConfig(pageSize = 10)){
-        dataBase.streamAppDao().getAllSteamAppsFlow("%$aFilter%")
+        dataBase.steamAppDao().getAllSteamAppsFlow("%$aFilter%")
     }.flow.cachedIn(viewModelScope)
 
     fun check() {
         viewModelScope.launch {
-            val apps = dataBase.streamAppDao().getSteamApps(1, 0)
+            val apps = dataBase.steamAppDao().getSteamApps(1, 0)
             if (apps.isEmpty()) {
                 loadFromNet()
             } else {
                 _stateResultNetwork.value =
-                    ResultLoad.Success(dataBase.streamAppDao().getSteamApps(10, 0))
+                    ResultLoad.Success(dataBase.steamAppDao().getSteamApps(10, 0))
             }
         }
     }
@@ -63,13 +70,13 @@ class MainModel @Inject constructor() : ViewModel() {
         _stateResultNetwork.value = ResultLoad.Loading
         viewModelScope.launch {
             try {
-                dataBase.streamAppDao().clearSteamApps()
+                dataBase.steamAppDao().clearSteamApps()
                 val netApps = steamService.getSteamApps()
                 val listDb = netApps.applist.apps.map {
-                    DbSteamApp(it.appid.toInt(), it.name, 0)
+                    DbSteamApp(it.appid.toInt(), it.name, false)
                 }
                 log("count loaded items=${listDb.count()}")
-                dataBase.streamAppDao().insertSteamApps(listDb)
+                dataBase.steamAppDao().insertSteamApps(listDb)
                 _stateResultNetwork.value = ResultLoad.Success(listDb)
             } catch (e: Exception) {
                 _stateResultNetwork.value = ResultLoad.Error(e.message ?: "Error load from net")

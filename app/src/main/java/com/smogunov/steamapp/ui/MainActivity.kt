@@ -9,7 +9,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,8 +31,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -68,7 +68,6 @@ class MainActivity : ComponentActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         //Twice onCreate in install
         if (savedInstanceState == null)
             mainModel.check()
@@ -77,9 +76,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val textFilter by mainModel.filterApps.collectAsStateWithLifecycle()
-                var currentScreen by remember {
-                    mutableStateOf(SCREEN.APPS)
-                }
+                val currentScreen by mainModel.currentScreen.collectAsStateWithLifecycle()
 
                 Scaffold(
                     topBar = {
@@ -108,7 +105,6 @@ class MainActivity : ComponentActivity() {
                                             }
                                         )
                                     }
-
                                     else -> {
                                         Text(text = currentScreen.name)
                                     }
@@ -145,7 +141,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = SCREEN.APPS.name
                         ) {
                             composable(SCREEN.APPS.name) {
-                                currentScreen = SCREEN.APPS
+                                mainModel.setCurrentScreen(SCREEN.APPS)
                                 val refreshScope = rememberCoroutineScope()
                                 var refreshing by remember { mutableStateOf(false) }
 
@@ -170,7 +166,7 @@ class MainActivity : ComponentActivity() {
                                         }) {
                                             Text("APPS")
                                         }
-                                        val dataApps by mainModel.dataBase.streamAppDao()
+                                        val dataApps by mainModel.dataBase.steamAppDao()
                                             .getAllSteamAppsFlowList("%$textFilter%")
                                             .collectAsStateWithLifecycle(
                                                 initialValue = emptyList()
@@ -208,40 +204,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             ) {
-                                currentScreen = SCREEN.APPS
-                                val refreshScope = rememberCoroutineScope()
-                                var refreshing by remember { mutableStateOf(false) }
-
-                                fun refresh() = refreshScope.launch {
-                                    refreshing = true
-                                    delay(2000)
-                                    refreshing = false
-                                }
-                                val state = rememberPullRefreshState(refreshing, ::refresh)
-
-                                currentScreen = SCREEN.NEWS
-                                val appid = currentBackStackEntry?.arguments?.getInt("appid")
-                                Box(Modifier.fillMaxSize().pullRefresh(state)) {
-                                    Button(onClick = {
-                                        navController.navigate("${SCREEN.TEXT.name}/$appid")
-                                    }) {
-                                        Text(text = "NEWS for appid=$appid")
-                                        appid?.let {
-                                            val dataNews by mainModel.dataBase.streamAppDao()
-                                                .getNewsFlow(appid = appid)
-                                                .collectAsStateWithLifecycle(
-                                                    initialValue = emptyList()
-                                                )
-                                            log("count news = ${dataNews.count()}")
-                                        }
-                                    }
-
-                                    PullRefreshIndicator(
-                                        refreshing,
-                                        state,
-                                        Modifier.align(Alignment.Center)
-                                    )
-                                }
+                                NewsScreen(mainModel, currentBackStackEntry?.arguments?.getInt("appid"))
                             }
 
                             composable(
@@ -252,9 +215,14 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             ) {
-                                currentScreen = SCREEN.TEXT
                                 val appid = currentBackStackEntry?.arguments?.getInt("appid")
-                                Text(text = "Long text of news for appid = $appid")
+
+                                log("appid in navigation  in text = $appid")
+
+                                val txtModel: MainModel = hiltViewModel()
+                                log("txtModel.dataBase=${txtModel.dataBase}")
+                                log("txtModel.steamService=${txtModel.steamService}")
+                                mainModel.setCurrentScreen(SCREEN.TEXT)
                             }
                         }
                     }
@@ -291,8 +259,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun TestPool() {
     val refreshScope = rememberCoroutineScope()
-    var refreshing by remember { mutableStateOf(true) }
-    var itemCount by remember { mutableStateOf(15) }
+    var refreshing by remember { mutableStateOf(false) }
+    var itemCount by remember { mutableIntStateOf(15) }
 
     fun refresh() = refreshScope.launch {
         refreshing = true
@@ -301,20 +269,20 @@ fun TestPool() {
         refreshing = false
     }
 
-    LaunchedEffect(null) {
-        refreshScope.launch {
-            delay(3000)
-            refreshing = false
-        }
-    }
+//    LaunchedEffect(null) {
+//        refreshScope.launch {
+//            delay(3000)
+//            refreshing = false
+//        }
+//    }
 
     val state = rememberPullRefreshState(refreshing, ::refresh)
 
-
     Box(
         Modifier
-            .pullRefresh(state)
             .background(Color.Yellow)
+            .fillMaxSize()
+            .pullRefresh(state)
     ) {
         LazyColumn(Modifier.fillMaxSize()) {
             if (!refreshing) {
@@ -323,6 +291,11 @@ fun TestPool() {
                 }
             }
         }
+//        Column(Modifier.fillMaxSize()) {
+//            Text("1")
+//            Text("2")
+//        }
+//        Text("txt")
 
         PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.Center))
     }
