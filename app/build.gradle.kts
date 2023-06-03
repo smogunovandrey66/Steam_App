@@ -23,6 +23,25 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release"){
+            storeFile = file("steamapps.jks")
+            storePassword = "steamapps"
+            keyAlias = "steam"
+            keyPassword = "steamapps"
+        }
+    }
+
+//    signingConfigs {
+//        release {
+//            storeFile file("jksPathProj.jks")
+//            storePassword "jksPassword"
+//            keyAlias "alias"
+//            keyPassword "jksPassword"
+//        }
+//    }
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -30,11 +49,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kapt {
         correctErrorTypes = true
@@ -48,11 +68,11 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
     }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
+//    packaging {
+//        resources {
+//            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+//        }
+//    }
 }
 
 dependencies {

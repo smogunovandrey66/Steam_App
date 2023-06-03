@@ -16,17 +16,21 @@ data class NetAppList(
 )
 
 data class NetSteamNew(
-    val gid: Int,
+    val gid: ULong,
     val title: String,
     val is_external_url: Boolean,
     val url: String,
     val author: String,
-    val content: String,
-    val date: Date
+    val contents: String,
+    val date: Long
+)
+
+data class AppNews(
+    val appid: Int,
+    val newsitems: List<NetSteamNew>,
+    val count: Int
 )
 
 data class NetSteamAppWithNews(
-    val appid: Int,
-    val news: List<NetSteamNew>,
-    val count: Int
+    val appnews: AppNews
 )

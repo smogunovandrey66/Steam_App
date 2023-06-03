@@ -5,16 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
@@ -23,7 +18,6 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -69,8 +63,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //Twice onCreate in install
-        if (savedInstanceState == null)
-            mainModel.check()
+//        if (savedInstanceState == null)
+//            mainModel.check()
         setContent {
             SteamAppTheme {
                 val navController = rememberNavController()
@@ -88,13 +82,6 @@ class MainActivity : ComponentActivity() {
                                             value = textFilter,
                                             onValueChange = {
                                                 mainModel.setFilterApps(it)
-                                            },
-                                            leadingIcon = {
-                                                Icon(Icons.Default.Search, null,
-                                                    modifier = Modifier.clickable {
-                                                        mainModel.setFilterApps("search")
-                                                    }
-                                                )
                                             },
                                             trailingIcon = {
                                                 Icon(Icons.Default.Clear, null,
@@ -122,7 +109,6 @@ class MainActivity : ComponentActivity() {
                                                 }
                                         )
                                     }
-
                                     else -> {
 
                                     }
@@ -141,60 +127,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = SCREEN.APPS.name
                         ) {
                             composable(SCREEN.APPS.name) {
-                                mainModel.setCurrentScreen(SCREEN.APPS)
-                                val refreshScope = rememberCoroutineScope()
-                                var refreshing by remember { mutableStateOf(false) }
-
-                                fun refresh() = refreshScope.launch {
-                                    refreshing = true
-                                    delay(2000)
-                                    refreshing = false
-                                }
-
-                                val state = rememberPullRefreshState(refreshing, ::refresh)
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .pullRefresh(state)
-                                ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                    ) {
-                                        Button(onClick = {
-                                        }) {
-                                            Text("APPS")
-                                        }
-                                        val dataApps by mainModel.dataBase.steamAppDao()
-                                            .getAllSteamAppsFlowList("%$textFilter%")
-                                            .collectAsStateWithLifecycle(
-                                                initialValue = emptyList()
-                                            )
-                                        log("dataApps.count=${dataApps.count()}")
-                                        LazyColumn {
-                                            if (!refreshing) {
-                                                items(dataApps) {
-                                                    Text(
-                                                        "${it.appid} ${it.name}",
-                                                        modifier = Modifier
-                                                            .padding(10.dp)
-                                                            .border(1.dp, Color.Red)
-                                                            .fillMaxWidth()
-                                                            .clickable {
-                                                                navController.navigate("${SCREEN.NEWS.name}/${it.appid}")
-                                                            }
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                    PullRefreshIndicator(
-                                        refreshing,
-                                        state,
-                                        Modifier.align(Alignment.Center)
-                                    )
-                                }
+                                AppsScreen(mainModel, navController)
                             }
 
                             composable(route = "${SCREEN.NEWS.name}/{appid}",
@@ -204,31 +137,31 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             ) {
-                                NewsScreen(mainModel, currentBackStackEntry?.arguments?.getInt("appid"))
+                                NewsScreen(mainModel, navController, currentBackStackEntry?.arguments?.getInt("appid"))
                             }
 
                             composable(
-                                route = "${SCREEN.TEXT.name}/{appid}",
+                                route = "${SCREEN.TEXT.name}/{gid}",
                                 arguments = listOf(
-                                    navArgument("appid") {
+                                    navArgument("gid") {
                                         type = NavType.IntType
                                     }
                                 )
                             ) {
-                                val appid = currentBackStackEntry?.arguments?.getInt("appid")
+                                val gid = currentBackStackEntry?.arguments?.getInt("gid")
 
-                                log("appid in navigation  in text = $appid")
+                                log("appid in navigation  in text = $gid")
 
-                                val txtModel: MainModel = hiltViewModel()
-                                log("txtModel.dataBase=${txtModel.dataBase}")
-                                log("txtModel.steamService=${txtModel.steamService}")
-                                mainModel.setCurrentScreen(SCREEN.TEXT)
+//                                Text("gid=$gid")
+//                                mainModel.setCurrentScreen(SCREEN.TEXT)
+
+                                TextScreen(mainModel, gid)
                             }
                         }
                     }
                 }
 
-                val state = mainModel.stateResultNetwork.collectAsStateWithLifecycle()
+//                val state = mainModel.stateResultSteamApps.collectAsStateWithLifecycle()
 //                when (val resultLoad: ResultLoad = state.value) {
 //                    ResultLoad.Loading -> {
 //                        Box(modifier = Modifier.fillMaxSize()) {

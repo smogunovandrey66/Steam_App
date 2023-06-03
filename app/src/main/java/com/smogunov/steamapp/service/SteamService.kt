@@ -11,8 +11,11 @@ interface SteamService {
     @GET("ISteamApps/GetAppList/v2")
     suspend fun getSteamApps(): NetAppList
 
+    /**
+     * Api v
+     */
     @GET("ISteamNews/GetNewsForApp/v2")
-    suspend fun getNewsSteamApp(@Query("appid") appid: Int): NetSteamAppWithNews
+    suspend fun getNewsSteamApp(@Query("appid") appid: Int): NetSteamAppWithNews?
 }
 
 object RetrofitClient{

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Database
+import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.PrimaryKey
@@ -64,39 +65,28 @@ data class DbNew(
 
 @Dao
 interface SteamAppDao{
+    @Update
+    suspend fun updateSteamApp(steamApp: DbSteamApp)
+    @Query("SELECT * FROM steam_apps WHERE name LIKE :filter ORDER BY appid DESC")
+    suspend fun getAllSteamAppsSuspend(filter: String): List<DbSteamApp>
+    @Insert
+    suspend fun insertSteamApps(apps: List<DbSteamApp>)
+    @Query("DELETE FROM steam_apps")
+    suspend fun clearSteamApps()
 
     @Query("SELECT * FROM steam_apps WHERE appid = :appid")
     suspend fun getSteamApp(appid: Int): DbSteamApp
 
-    @Update
-    suspend fun updateSteamApp(steamApp: DbSteamApp)
 
-    @Query("SELECT * FROM steam_apps LIMIT :limit OFFSET :offset")
-    suspend fun getSteamApps(limit: Int, offset: Int): List<DbSteamApp>
-
-    @Query("SELECT * FROM steam_apps LIMIT :limit OFFSET :offset")
-    fun getSteamAppsPaging(limit: Int, offset: Int): PagingSource<Int, DbSteamApp>
-
-    @Query("SELECT * FROM steam_apps WHERE name LIKE :query")
-    fun getAllSteamAppsFlow(query: String): PagingSource<Int, DbSteamApp>
-
-    @Query("SELECT * FROM steam_apps WHERE name LIKE :query")
-    fun getAllSteamAppsFlowList(query: String): Flow<List<DbSteamApp>>
-
-    @Query("SELECT * FROM steam_apps WHERE name LIKE :query")
-    fun getAllSteamAppsList(query: String): List<DbSteamApp>
-
+    @Query("SELECT * FROM news WHERE appid = :appid ORDER BY gid DESC")
+    suspend fun getAllNewsSuspend(appid: Int): List<DbNew>
+    @Query("DELETE FROM news WHERE appid = :appid")
+    suspend fun clearNews(appid: Int)
     @Insert
-    suspend fun insertSteamApps(apps: List<DbSteamApp>)
+    suspend fun insertNews(news: List<DbNew>)
 
-    @Query("DELETE FROM steam_apps")
-    suspend fun clearSteamApps()
-
-    @Query("SELECT * FROM news WHERE appid = :appid")
-    fun getNewsFlow(appid: Int): Flow<List<DbNew>>
-
-    @Query("SELECT * FROM news WHERE appid = :appid")
-    suspend fun getNewsSuspend(appid: Int): List<DbNew>
+    @Query("SELECT contents FROM news WHERE gid = :gid")
+    suspend fun getContents(gid: Int): String
 }
 
 @Database(entities = [DbSteamApp::class, DbNew::class], version = 1, exportSchema = false)
