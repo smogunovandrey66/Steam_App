@@ -5,3 +5,9 @@ enum class SCREEN {
     NEWS,
     TEXT
 }
+
+fun SCREEN.toAppBarText() = when(this) {
+        SCREEN.APPS -> "Приложения"
+        SCREEN.TEXT -> "Контент"
+        SCREEN.NEWS -> "Новости"
+    }

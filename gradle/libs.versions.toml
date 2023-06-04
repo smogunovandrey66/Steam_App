@@ -17,6 +17,11 @@ hilt-navigation-compose = "1.0.0"
 room-version = "2.5.1"
 material-android = "1.5.0-beta01"
 navigation-compose = "2.6.0-rc02"
+material = "1.9.0"
+appcompat = "1.6.1"
+constraintlayout = "2.1.4"
+navigation-fragment-ktx = "2.5.3"
+navigation-ui-ktx = "2.5.3"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -46,6 +51,11 @@ room-compiler = {module = "androidx.room:room-compiler", version.ref = "room-ver
 androidx-lifecycle = {group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-ktx"}
 androidx-lifecyclektx = {group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle-ktx"}
 androidx-navigation = {group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose"}
+com-google-android-material-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation-fragment-ktx" }
+navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation-ui-ktx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

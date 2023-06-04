@@ -1,5 +1,8 @@
 package com.smogunov.steamapp.model
 
+import android.os.Build
+import android.text.Html
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -56,12 +59,14 @@ class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewMo
     fun loadSteamApps(clearDb: Boolean) {
         _stateResultSteamApps.value = ResultLoad.Loading
         viewModelScope.launch {
+            log("loadSteamApps with clearDb=$clearDb")
             if (clearDb) {
                 loadSteamAppsFromNet()
                 return@launch
             }
 
             val apps = steamDataBase.steamAppDao().getAllSteamAppsSuspend("%${filterApps.value}%")
+            log("loadSteamApps from database apps.count=${apps.count()}")
             if (apps.isEmpty()) {
                 loadSteamAppsFromNet()
             } else {
@@ -77,18 +82,30 @@ class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewMo
         try {
             steamDataBase.steamAppDao().clearSteamApps()
             val netApps = steamNetService.getSteamApps()
+            val dublicates = netApps.applist.apps.groupingBy { it.appid }.eachCount().filter { it.value > 1 }.keys
+            netApps.applist.apps.onEach {
+                if(dublicates.contains(it.appid))
+                    log("loadSteamAppsFromNet duplicate ${it.appid}, ${it.name}")
+            }
+            log("loadSteamAppsFromNet from net netApps.applist.apps.size=${netApps.applist.apps.size}")
             var listDb = netApps.applist.apps
                 //Некоторые элементы содержат пустое имя, их пропускаем
                 .filter {
                     it.name.trim().isNotEmpty()
                 }
+                .filterNot {
+                    it.name.contains(Regex("\\p{IsHan}"))
+                }
                 .map {
                     DbSteamApp(it.appid.toInt(), it.name, false)
                 }
-            log("count loaded items=${listDb.count()}")
+
+            log("loadSteamAppsFromNet count items for insert=${listDb.count()}")
             steamDataBase.steamAppDao().insertSteamApps(listDb)
             listDb = listDb.filter {
                 it.name.contains(filterApps.value)
+            }.sortedBy {
+                it.name
             }
             _stateResultSteamApps.value = ResultLoad.Success(listDb)
         } catch (e: Exception) {
@@ -173,8 +190,8 @@ class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewMo
         _stateResultNews.value = ResultLoad.NotYetLoaded
     }
 
-    val _stateContents: MutableStateFlow<String> = MutableStateFlow("")
-    val stateContents: StateFlow<String> = _stateContents
+    val _stateContents: MutableStateFlow<String?> = MutableStateFlow("")
+    val stateContents: StateFlow<String?> = _stateContents
 
     fun setContent(gid: Int) {
         viewModelScope.launch {
@@ -183,11 +200,9 @@ class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewMo
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.N)
 fun main() {
-    val i = 1665156543
-    val l: Long = i.toLong()
-    val d = Date(l * 1000)
-    val s = SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss")
-    println(s.format(d))
-
+    val list = listOf(1, 2, 3, 1)
+    val a = list.groupingBy { it }.eachCount().filter { it.value > 1 }.keys
+    println(a)
 }

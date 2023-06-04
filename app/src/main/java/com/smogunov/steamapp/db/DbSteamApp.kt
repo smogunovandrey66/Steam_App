@@ -67,7 +67,7 @@ data class DbNew(
 interface SteamAppDao{
     @Update
     suspend fun updateSteamApp(steamApp: DbSteamApp)
-    @Query("SELECT * FROM steam_apps WHERE name LIKE :filter ORDER BY appid DESC")
+    @Query("SELECT * FROM steam_apps WHERE name LIKE :filter ORDER BY name DESC")
     suspend fun getAllSteamAppsSuspend(filter: String): List<DbSteamApp>
     @Insert
     suspend fun insertSteamApps(apps: List<DbSteamApp>)
@@ -78,7 +78,7 @@ interface SteamAppDao{
     suspend fun getSteamApp(appid: Int): DbSteamApp
 
 
-    @Query("SELECT * FROM news WHERE appid = :appid ORDER BY gid DESC")
+    @Query("SELECT * FROM news WHERE appid = :appid ORDER BY date DESC")
     suspend fun getAllNewsSuspend(appid: Int): List<DbNew>
     @Query("DELETE FROM news WHERE appid = :appid")
     suspend fun clearNews(appid: Int)
@@ -86,7 +86,7 @@ interface SteamAppDao{
     suspend fun insertNews(news: List<DbNew>)
 
     @Query("SELECT contents FROM news WHERE gid = :gid")
-    suspend fun getContents(gid: Int): String
+    suspend fun getContents(gid: Int): String?
 }
 
 @Database(entities = [DbSteamApp::class, DbNew::class], version = 1, exportSchema = false)

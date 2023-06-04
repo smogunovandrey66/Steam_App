@@ -57,8 +57,7 @@ class MainActivity : ComponentActivity() {
     private val mainModel: MainModel by viewModels()
 
     @OptIn(
-        ExperimentalMaterial3Api::class,
-        ExperimentalMaterialApi::class
+        ExperimentalMaterial3Api::class
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +92,7 @@ class MainActivity : ComponentActivity() {
                                         )
                                     }
                                     else -> {
-                                        Text(text = currentScreen.name)
+                                        Text(text = currentScreen.toAppBarText())
                                     }
                                 }
                             },
