@@ -17,4 +17,4 @@ Steam App demonstrates modern Android development with Hilt, Coroutines, Jetpack
   - MVVM Architecture (View - DataBinding - ViewModel - Model)
 - [Retrofit2 & OkHttp3](https://github.com/square/retrofit): Construct the REST APIs and paging network data.
 
-<img src="/previews/Steam_app.gif" align="right" width="320"/>
+<img src="/previews/Steam_app.gif"/>
