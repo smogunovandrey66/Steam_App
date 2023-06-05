@@ -1,5 +1,8 @@
 package com.smogunov.steamapp.ui
 
+/**
+ * Перечисления экранов
+ */
 enum class SCREEN {
     APPS,
     NEWS,

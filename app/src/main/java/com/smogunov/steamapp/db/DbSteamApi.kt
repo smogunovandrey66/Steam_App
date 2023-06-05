@@ -1,10 +1,8 @@
 package com.smogunov.steamapp.db
 
 import android.content.Context
-import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Database
-import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.PrimaryKey
@@ -14,7 +12,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import androidx.room.Update
-import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
 
@@ -32,18 +29,9 @@ class DateConverter {
     }
 }
 
-//class DateConterter {
-//    @TypeConverter
-//    fun dateToInt(aDate: Date): Int = aDate.time.toInt()
-//
-//    @TypeConverter
-//    fun intToDate(aInt: Int): Date = Date(aInt.toLong())
-//}
-
 @Entity("steam_apps")
 data class DbSteamApp(
     @PrimaryKey
-//    val id: Int = 0,
     val appid: Int,
     val name: String,
     var loadedNews: Boolean
@@ -52,7 +40,6 @@ data class DbSteamApp(
 @Entity("news")
 data class DbNew(
     @PrimaryKey
-//    val id: Int,
     val gid: Int,
     val appid: Int,
     val title: String,

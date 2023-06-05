@@ -16,13 +16,6 @@
         android:theme="@style/Theme.SteamApp"
         tools:targetApi="31">
         <activity
-            android:name=".ui.TestActivity"
-            android:exported="true"
-            android:label="@string/title_activity_test"
-            android:theme="@style/Theme.SteamApp">
-
-        </activity>
-        <activity
             android:name=".ui.MainActivity"
             android:exported="true"
             android:label="@string/app_name"

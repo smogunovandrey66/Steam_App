@@ -16,7 +16,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,18 +23,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.smogunov.steamapp.model.ResultLoad
 
+/**
+ *  Параметризованный экран отображения данных
+ *  @param firstLoadFunction - функция первоначальной загрузки данных
+ *  @param reloadAllFunction - функция для перезагрузки данных
+ *  @param stateResultLoad - состояние результата загрузки
+ *  @param cardItem - элемент Compose для отображения одного item в LazyColumn
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun <T> LoadingScreen(/*newScreen: SCREEN, model: MainModel, updateOperation: suspend () -> Unit,
-firstOperation: suspend () -> Unit, content: LazyListScope.() -> Unit,*/
+fun <T> LoadingScreen(
                       firstLoadFunction: () -> Unit,
                       reloadAllFunction: () -> Unit,
                       stateResultLoad: State<ResultLoad>,
                       cardItem: @Composable (T) -> Unit) {
-//    model.setCurrentScreen(newScreen)
-    val listItems: List<T> = emptyList()
-//
-    val refreshScope = rememberCoroutineScope()
+
     var refreshing by remember { mutableStateOf(true) }
 
     val state = rememberPullRefreshState(refreshing, reloadAllFunction)
@@ -70,7 +72,6 @@ firstOperation: suspend () -> Unit, content: LazyListScope.() -> Unit,*/
                     items(list){
                         cardItem(it)
                     }
-
                     refreshing = false
                 }
 

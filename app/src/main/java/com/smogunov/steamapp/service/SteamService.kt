@@ -8,11 +8,14 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface SteamService {
+    /**
+     * Получение приложений
+     */
     @GET("ISteamApps/GetAppList/v2")
     suspend fun getSteamApps(): NetAppList
 
     /**
-     * Api v
+     * Получение новостей
      */
     @GET("ISteamNews/GetNewsForApp/v2")
     suspend fun getNewsSteamApp(@Query("appid") appid: Int): NetSteamAppWithNews?

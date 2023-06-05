@@ -1,7 +1,6 @@
 package com.smogunov.steamapp.model
 
 import android.os.Build
-import android.text.Html
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -16,11 +15,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import javax.inject.Inject
 
+/**
+ * Результат загрузки даннных из модели. Класса Succes параметризован типом.
+ */
 sealed class ResultLoad {
     class Success<T>(val list: List<T>) : ResultLoad()
     object Loading : ResultLoad()
@@ -28,6 +28,9 @@ sealed class ResultLoad {
     class Error(val errorMessage: String) : ResultLoad()
 }
 
+/**
+ * Основная модель
+ */
 @HiltViewModel
 class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel() {
 
@@ -43,7 +46,7 @@ class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewMo
         _currentScreen.value = aNewScreen
     }
 
-    private val _filterApps: MutableStateFlow<String> = MutableStateFlow("Serious Sam")
+    private val _filterApps: MutableStateFlow<String> = MutableStateFlow("")
     val filterApps: StateFlow<String> = _filterApps
 
     fun setFilterApps(aNewFilter: String) {
@@ -82,20 +85,23 @@ class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewMo
         try {
             steamDataBase.steamAppDao().clearSteamApps()
             val netApps = steamNetService.getSteamApps()
+            log("loadSteamAppsFromNet loaded from net=${netApps.applist.apps.count()}")
             val dublicates = netApps.applist.apps.groupingBy { it.appid }.eachCount().filter { it.value > 1 }.keys
-            netApps.applist.apps.onEach {
-                if(dublicates.contains(it.appid))
-                    log("loadSteamAppsFromNet duplicate ${it.appid}, ${it.name}")
-            }
+            log("loadSteamAppsFromNet dublicates.count=${dublicates.count()}")
+
             log("loadSteamAppsFromNet from net netApps.applist.apps.size=${netApps.applist.apps.size}")
             var listDb = netApps.applist.apps
+                //Заметил, что Steam Api возвращает дубликаты
+                .distinctBy {
+                    it.appid
+                }
                 //Некоторые элементы содержат пустое имя, их пропускаем
                 .filter {
                     it.name.trim().isNotEmpty()
                 }
-                .filterNot {
-                    it.name.contains(Regex("\\p{IsHan}"))
-                }
+//                .filterNot { Исключение китайских символов
+//                    it.name.contains(Regex("\\p{IsHan}"))
+//                }
                 .map {
                     DbSteamApp(it.appid.toInt(), it.name, false)
                 }
@@ -153,13 +159,6 @@ class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewMo
             //Очищаем новости для выбранного приложения
             steamDataBase.steamAppDao().clearNews(appid)
             val netNews = steamNetService.getNewsSteamApp(appid)?.appnews?.newsitems ?: emptyList()
-            val convertNetNews = netNews.map {
-                val n = it.contents == null
-                "${it.contents} null = $n"
-            }
-//            log("loadNewsFromNet convertNetNews=$convertNetNews")
-//            log("loadNewsFromNet netNews.count() = ${netNews.count()}")
-//            log("loadNewsFromNet $netNews")
             val dbNews = netNews.map {
                 DbNew(
                     it.gid.toInt(),
