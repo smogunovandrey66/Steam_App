@@ -8,17 +8,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Icon
 import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
@@ -29,6 +36,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.smogunov.steamapp.model.MainModel
 import com.smogunov.steamapp.ui.theme.SteamAppTheme
+import com.smogunov.steamapp.utils.log
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -38,7 +46,7 @@ class MainActivity : ComponentActivity() {
     private val mainModel: MainModel by viewModels()
 
     @OptIn(
-        ExperimentalMaterial3Api::class
+        ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +55,10 @@ class MainActivity : ComponentActivity() {
             SteamAppTheme {
                 val navController = rememberNavController()
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
-                val textFilter by mainModel.filterApps.collectAsStateWithLifecycle()
+                val textFilterFromModel by mainModel.filterApps.collectAsStateWithLifecycle()
+                var textFilterForTextField by remember {
+                    mutableStateOf(textFilterFromModel)
+                }
                 val currentScreen by mainModel.currentScreen.collectAsStateWithLifecycle()
 
                 Scaffold(
@@ -56,18 +67,43 @@ class MainActivity : ComponentActivity() {
                             title = {
                                 when (currentScreen) {
                                     SCREEN.APPS -> {
+                                        val keyboardController =
+                                            LocalSoftwareKeyboardController.current
+                                        //Фильтр поиска
                                         TextField(
-                                            value = textFilter,
+                                            value = textFilterForTextField,
                                             onValueChange = {
-                                                mainModel.setFilterApps(it)
+                                                textFilterForTextField = it
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Default.Search, null,
+                                                    modifier = Modifier.clickable {
+                                                        keyboardController?.hide()
+                                                        mainModel.setFilterApps(
+                                                            textFilterForTextField
+                                                        )
+                                                    }
+                                                )
                                             },
                                             trailingIcon = {
                                                 Icon(Icons.Default.Clear, null,
                                                     modifier = Modifier.clickable {
-                                                        mainModel.setFilterApps("")
+                                                        keyboardController?.hide()
+                                                        textFilterForTextField = ""
+                                                        if (textFilterFromModel.isNotEmpty()) {
+                                                            mainModel.setFilterApps("")
+                                                        }
                                                     }
                                                 )
-                                            }
+                                            },
+                                            singleLine = true,
+                                            keyboardActions = KeyboardActions(
+                                                onDone = {
+                                                    log("onDone")
+                                                    keyboardController?.hide()
+                                                    mainModel.setFilterApps(textFilterForTextField)
+                                                }
+                                            )
                                         )
                                     }
 

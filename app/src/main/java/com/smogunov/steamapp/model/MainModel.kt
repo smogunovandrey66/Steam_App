@@ -70,7 +70,7 @@ class MainModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewMo
 
             val apps = steamDataBase.steamAppDao().getAllSteamAppsSuspend("%${filterApps.value}%")
             log("loadSteamApps from database apps.count=${apps.count()}")
-            if (apps.isEmpty()) {
+            if (apps.isEmpty() && filterApps.value.isEmpty()) {
                 loadSteamAppsFromNet()
             } else {
                 _stateResultSteamApps.value = ResultLoad.Success(apps)

@@ -54,7 +54,7 @@ data class DbNew(
 interface SteamAppDao{
     @Update
     suspend fun updateSteamApp(steamApp: DbSteamApp)
-    @Query("SELECT * FROM steam_apps WHERE name LIKE :filter ORDER BY name DESC")
+    @Query("SELECT * FROM steam_apps WHERE name LIKE :filter ORDER BY name ASC")
     suspend fun getAllSteamAppsSuspend(filter: String): List<DbSteamApp>
     @Insert
     suspend fun insertSteamApps(apps: List<DbSteamApp>)
