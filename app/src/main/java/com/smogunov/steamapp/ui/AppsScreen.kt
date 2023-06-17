@@ -12,22 +12,23 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.smogunov.steamapp.db.DbSteamApp
-import com.smogunov.steamapp.model.MainModel
+import com.smogunov.steamapp.model.mvvm.AppsModel
+import com.smogunov.steamapp.model.mvvm.NewsModel
 
 /**
  * Экран списка приложений
- * @param mainModel - модель данных
+ * @param appsModel - модель данных
  * @param navController - контроллер навигации
  */
 @Composable
-fun AppsScreen(mainModel: MainModel, navController: NavController) {
+fun AppsScreen(appsModel: AppsModel, newsModel: NewsModel, navController: NavController) {
 
-    val resultState = mainModel.stateResultSteamApps.collectAsStateWithLifecycle()
-    mainModel.setCurrentScreen(SCREEN.APPS)
+    val resultState = appsModel.stateResultSteamApps.collectAsStateWithLifecycle()
+    appsModel.setCurrentScreen(SCREEN.APPS)
 
     LoadingScreen<DbSteamApp>(
-        firstLoadFunction = { mainModel.loadSteamApps(false) },
-        reloadAllFunction = { mainModel.loadSteamApps(true) },
+        firstLoadFunction = { appsModel.loadSteamApps(false) },
+        reloadAllFunction = { appsModel.loadSteamApps(true) },
         stateResultLoad = resultState
     ) {
         Card(
@@ -35,7 +36,7 @@ fun AppsScreen(mainModel: MainModel, navController: NavController) {
             elevation = 5.dp,
             modifier = Modifier
                 .clickable {
-                    mainModel.setNotLoadedNews()
+                    newsModel.setNotLoadedNews()
                     navController.navigate("${SCREEN.NEWS.name}/${it.appid}")
                 }
                 .fillMaxWidth()

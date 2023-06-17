@@ -16,28 +16,29 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.smogunov.steamapp.db.DbNew
-import com.smogunov.steamapp.model.MainModel
+import com.smogunov.steamapp.model.mvvm.AppsModel
+import com.smogunov.steamapp.model.mvvm.NewsModel
 import com.smogunov.steamapp.utils.format
 
 /**
  * Экран отображения новостей
- * @param mainModel - модель данных
+ * @param newsModel - модель данных
  * @param navController - контроллер навигации
  * @param appid - идентификатор приложения
  */
 @Composable
-fun NewsScreen(mainModel: MainModel, navController: NavController, appid: Int?) {
-    mainModel.setCurrentScreen(SCREEN.NEWS)
+fun NewsScreen(newsModel: NewsModel, appsModel: AppsModel, navController: NavController, appid: Int?) {
+    appsModel.setCurrentScreen(SCREEN.NEWS)
 
     if (appid == null) {
         return
     }
 
-    val stateResultLoad = mainModel.stateResultNews.collectAsStateWithLifecycle()
+    val stateResultLoad = newsModel.stateResultNews.collectAsStateWithLifecycle()
 
     LoadingScreen<DbNew>(
-        firstLoadFunction = { mainModel.loadNews(appid, false) },
-        reloadAllFunction = { mainModel.loadNews(appid, true) },
+        firstLoadFunction = { newsModel.loadNews(appid, false) },
+        reloadAllFunction = { newsModel.loadNews(appid, true) },
         stateResultLoad = stateResultLoad
     ) {
         val dateString = it.date.format()
@@ -47,7 +48,7 @@ fun NewsScreen(mainModel: MainModel, navController: NavController, appid: Int?) 
             elevation = 5.dp,
             modifier = Modifier
                 .clickable {
-                    mainModel.setNotLoadedNews()
+                    newsModel.setNotLoadedNews()
                     navController.navigate("${SCREEN.TEXT.name}/${it.gid}")
                 }
                 .fillMaxWidth()

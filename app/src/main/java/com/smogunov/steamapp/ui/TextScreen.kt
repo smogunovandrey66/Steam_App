@@ -7,22 +7,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.smogunov.steamapp.model.MainModel
+import com.smogunov.steamapp.model.mvvm.AppsModel
+import com.smogunov.steamapp.model.mvvm.ContentModel
 
 
 /**
  * Экран отображения текста
- * @param mainModel - модель данных
+ * @param contentModel - модель данных
  * @param gid - идентификатор новости
  */
 @Composable
-fun TextScreen(mainModel: MainModel, gid: Int?) {
+fun TextScreen(contentModel: ContentModel, appsModel: AppsModel, gid: Int?) {
     if (gid == null)
         return
-    mainModel.setCurrentScreen(SCREEN.TEXT)
-    mainModel.setContent(gid)
+    appsModel.setCurrentScreen(SCREEN.TEXT)
+    contentModel.setContent(gid)
 
-    val contents by mainModel.stateContents.collectAsStateWithLifecycle()
+    val contents by contentModel.stateContents.collectAsStateWithLifecycle()
 
     if (contents == null)
         return

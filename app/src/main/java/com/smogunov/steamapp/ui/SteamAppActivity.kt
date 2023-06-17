@@ -34,16 +34,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.smogunov.steamapp.model.MainModel
+import com.smogunov.steamapp.model.mvvm.AppsModel
+import com.smogunov.steamapp.model.mvvm.ContentModel
+import com.smogunov.steamapp.model.mvvm.NewsModel
 import com.smogunov.steamapp.ui.theme.SteamAppTheme
 import com.smogunov.steamapp.utils.log
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class SteamAppActivity : ComponentActivity() {
 
-    private val mainModel: MainModel by viewModels()
+    private val appsModel: AppsModel by viewModels()
+    private val newsModel: NewsModel by viewModels()
+    private val contentModel: ContentModel by viewModels()
 
     @OptIn(
         ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class
@@ -55,11 +59,11 @@ class MainActivity : ComponentActivity() {
             SteamAppTheme {
                 val navController = rememberNavController()
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
-                val textFilterFromModel by mainModel.filterApps.collectAsStateWithLifecycle()
+                val textFilterFromModel by appsModel.filterApps.collectAsStateWithLifecycle()
                 var textFilterForTextField by remember {
                     mutableStateOf(textFilterFromModel)
                 }
-                val currentScreen by mainModel.currentScreen.collectAsStateWithLifecycle()
+                val currentScreen by appsModel.currentScreen.collectAsStateWithLifecycle()
 
                 Scaffold(
                     topBar = {
@@ -79,7 +83,7 @@ class MainActivity : ComponentActivity() {
                                                 Icon(Icons.Default.Search, null,
                                                     modifier = Modifier.clickable {
                                                         keyboardController?.hide()
-                                                        mainModel.setFilterApps(
+                                                        appsModel.setFilterApps(
                                                             textFilterForTextField
                                                         )
                                                     }
@@ -91,7 +95,7 @@ class MainActivity : ComponentActivity() {
                                                         keyboardController?.hide()
                                                         textFilterForTextField = ""
                                                         if (textFilterFromModel.isNotEmpty()) {
-                                                            mainModel.setFilterApps("")
+                                                            appsModel.setFilterApps("")
                                                         }
                                                     }
                                                 )
@@ -101,7 +105,7 @@ class MainActivity : ComponentActivity() {
                                                 onDone = {
                                                     log("onDone")
                                                     keyboardController?.hide()
-                                                    mainModel.setFilterApps(textFilterForTextField)
+                                                    appsModel.setFilterApps(textFilterForTextField)
                                                 }
                                             )
                                         )
@@ -143,7 +147,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = SCREEN.APPS.name
                         ) {
                             composable(SCREEN.APPS.name) {
-                                AppsScreen(mainModel, navController)
+                                AppsScreen(appsModel, newsModel, navController)
                             }
 
                             composable(route = "${SCREEN.NEWS.name}/{appid}",
@@ -154,7 +158,8 @@ class MainActivity : ComponentActivity() {
                                 )
                             ) {
                                 NewsScreen(
-                                    mainModel,
+                                    newsModel,
+                                    appsModel,
                                     navController,
                                     currentBackStackEntry?.arguments?.getInt("appid")
                                 )
@@ -169,7 +174,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             ) {
                                 val gid = currentBackStackEntry?.arguments?.getInt("gid")
-                                TextScreen(mainModel, gid)
+                                TextScreen(contentModel, appsModel, gid)
                             }
                         }
                     }
